@@ -1,0 +1,89 @@
+/* ============================================================
+   DentalCare — auth.css
+   Login page styles
+   ============================================================ */
+.auth-body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f1f17 0%, #1a3328 50%, #0f1f17 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.auth-container {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.auth-brand {
+  text-align: center;
+}
+
+.auth-logo {
+  width: 56px; height: 56px;
+  background: var(--primary);
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  margin: 0 auto 12px;
+}
+
+.auth-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.auth-subtitle {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.45);
+}
+
+.auth-card {
+  width: 100%;
+  background: #fff;
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.auth-card-header {
+  margin-bottom: 22px;
+}
+.auth-card-header h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.auth-card-header p {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin-top: 3px;
+}
+
+.auth-form .form-group { margin-bottom: 16px; }
+
+.auth-alert {
+  width: 100%;
+  border-radius: var(--radius-sm);
+}
+
+.auth-hint {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.3);
+  text-align: center;
+}
+.auth-hint code {
+  background: rgba(255,255,255,0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: rgba(255,255,255,0.55);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
