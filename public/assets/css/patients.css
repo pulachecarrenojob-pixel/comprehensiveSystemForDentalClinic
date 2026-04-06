@@ -1,0 +1,50 @@
+/* ============================================================
+   DentalCare — patients.css
+   Add these styles at the bottom of your public/assets/css/app.css
+   ============================================================ */
+
+/* Patient avatar in table */
+.patient-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* Action buttons in tables */
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+.action-btn:hover {
+  background: var(--gray-100);
+  color: var(--text);
+  border-color: var(--gray-300);
+}
+.action-btn.danger:hover {
+  background: var(--danger-light);
+  color: var(--danger);
+  border-color: #fca5a5;
+}
+
+/* KPI left layout */
+.kpi-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
