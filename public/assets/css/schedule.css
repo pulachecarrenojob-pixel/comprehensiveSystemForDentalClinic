@@ -1,0 +1,225 @@
+/* ============================================================
+   DentalCare — schedule.css
+   Weekly calendar grid styles
+   ============================================================ */
+
+:root {
+  --slot-h: 40px;
+  --time-col: 60px;
+}
+
+/* Nav buttons */
+.cal-nav-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+.cal-nav-btn:hover { background: var(--gray-100); color: var(--text); }
+
+/* Dentist filter buttons */
+.dentist-filter-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--font);
+}
+.dentist-filter-btn:hover { border-color: var(--gray-300); color: var(--text); }
+.dentist-filter-btn.active {
+  background: var(--gray-900);
+  border-color: var(--gray-900);
+  color: #fff;
+}
+.dentist-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* Calendar wrapper */
+.cal-wrap {
+  overflow: auto;
+  max-height: calc(100vh - 340px);
+}
+
+/* Calendar grid */
+.cal-grid {
+  display: grid;
+  grid-template-columns: var(--time-col) repeat(7, minmax(120px, 1fr));
+  min-width: 700px;
+}
+
+/* Corner cell */
+.cal-corner {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 20;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  padding: 10px 8px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+/* Day headers */
+.cal-day-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg-card);
+  border-bottom: 2px solid var(--border);
+  border-right: 1px solid var(--border-light);
+  padding: 10px 10px 8px;
+  text-align: center;
+}
+.cal-day-header.today  { border-bottom-color: var(--primary); }
+.cal-day-header.weekend { background: var(--gray-50); }
+
+.cal-day-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+.cal-day-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 3px auto 2px;
+}
+.cal-day-num.today-num {
+  background: var(--primary);
+  color: #fff;
+}
+.cal-day-month {
+  display: block;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+/* Time column */
+.cal-time {
+  position: sticky;
+  left: 0;
+  z-index: 5;
+  background: var(--bg-card);
+  border-right: 1px solid var(--border);
+  height: var(--slot-h);
+  padding: 0 8px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+.cal-time span {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  transform: translateY(-6px);
+}
+
+/* Calendar cells */
+.cal-cell {
+  height: var(--slot-h);
+  border-right: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-light);
+  padding: 2px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.cal-cell:hover { background: var(--primary-light); }
+.cal-cell.today-col { background: rgba(29,158,117,0.02); }
+.cal-cell.weekend-col { background: var(--gray-50); }
+.cal-cell.weekend-col:hover { background: rgba(29,158,117,0.04); }
+
+/* Appointment block */
+.cal-appt {
+  position: absolute;
+  left: 2px; right: 2px; top: 2px;
+  border-radius: 6px;
+  border-left: 3px solid;
+  padding: 4px 6px;
+  cursor: pointer;
+  z-index: 8;
+  overflow: hidden;
+  transition: transform 0.12s, box-shadow 0.12s;
+  min-height: 36px;
+}
+.cal-appt:hover {
+  transform: translateX(1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  z-index: 9;
+}
+.cal-appt-time {
+  font-size: 0.65rem;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  margin-bottom: 1px;
+}
+.cal-appt-patient {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cal-appt-proc {
+  font-size: 0.7rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cal-appt .badge {
+  font-size: 0.6rem;
+  padding: 1px 5px;
+  margin-top: 2px;
+}
+
+/* View appointment modal body */
+.appt-detail-row {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-light);
+  align-items: flex-start;
+}
+.appt-detail-row:last-child { border-bottom: none; }
+.appt-detail-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: var(--gray-100);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+.appt-detail-label { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 2px; }
+.appt-detail-value { font-size: 0.875rem; font-weight: 500; color: var(--text); }
+
+@media (max-width: 768px) {
+  .cal-grid { grid-template-columns: var(--time-col) repeat(7, minmax(90px, 1fr)); }
+  .cal-appt-proc { display: none; }
+}
