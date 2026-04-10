@@ -131,7 +131,7 @@ class AnamnesisController extends Controller {
             'notes'          => $this->sanitize($this->input('notes')),
         ];
 
-        $this->model->update($id, $data, $this->parseAllergies(), $this->parseConditions());
+        $this->model->updateAnamnesis($id, $data, $this->parseAllergies(), $this->parseConditions());
         flash('success', 'Anamnesis updated successfully.');
         $this->redirect('/anamnesis/show?id=' . $id);
     }

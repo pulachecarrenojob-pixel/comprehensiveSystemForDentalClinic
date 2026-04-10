@@ -95,7 +95,7 @@ class AnamnesisModel extends Model {
         }
     }
 
-    public function update(int $id, array $data, array $allergies, array $conditions): bool {
+    public function updateAnamnesis(int $id, array $data, array $allergies, array $conditions): bool {
         $ok = parent::update($id, $data);
         $this->saveAllergies($id, $allergies);
         $this->saveConditions($id, $conditions);
