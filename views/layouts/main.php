@@ -14,7 +14,6 @@
     foreach ($extraCss as $css): ?>
       <link rel="stylesheet" href="<?= asset('css/' . $css) ?>">
     <?php endforeach; endif; ?>
-  <link rel="stylesheet" href="<?= asset('css/patients.css') ?>">
 </head>
 
 <body class="app-body">
