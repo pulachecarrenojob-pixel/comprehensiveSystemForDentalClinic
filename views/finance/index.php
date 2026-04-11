@@ -1,6 +1,10 @@
 <?php
-// All data comes pre-processed from FinanceController — no model calls here
 $c = $kpis['currency'] ?? 'S/';
+
+// Helper to build correct POST action URL
+function financeUrl(string $path): string {
+    return url($path);
+}
 ?>
 
 <!-- Page header -->
@@ -10,14 +14,13 @@ $c = $kpis['currency'] ?? 'S/';
     <p>Revenue tracking and payment management</p>
   </div>
   <button class="btn btn-primary" onclick="openModal('paymentModal')">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;flex-shrink:0"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     Register Payment
   </button>
 </div>
 
 <!-- KPI Cards -->
 <div class="kpi-grid" style="margin-bottom:24px">
-
   <div class="kpi-card">
     <div class="kpi-left">
       <div class="kpi-icon green">
@@ -32,7 +35,6 @@ $c = $kpis['currency'] ?? 'S/';
       </div>
     </div>
   </div>
-
   <div class="kpi-card">
     <div class="kpi-left">
       <div class="kpi-icon orange">
@@ -45,7 +47,6 @@ $c = $kpis['currency'] ?? 'S/';
       </div>
     </div>
   </div>
-
   <div class="kpi-card">
     <div class="kpi-left">
       <div class="kpi-icon blue">
@@ -58,7 +59,6 @@ $c = $kpis['currency'] ?? 'S/';
       </div>
     </div>
   </div>
-
   <div class="kpi-card">
     <div class="kpi-left">
       <div class="kpi-icon green">
@@ -71,13 +71,10 @@ $c = $kpis['currency'] ?? 'S/';
       </div>
     </div>
   </div>
-
 </div>
 
 <!-- Charts row -->
 <div class="charts-row" style="margin-bottom:20px">
-
-  <!-- Daily revenue bar chart -->
   <div class="card">
     <div class="card-header">
       <span class="card-title">Daily Revenue</span>
@@ -87,8 +84,6 @@ $c = $kpis['currency'] ?? 'S/';
       <canvas id="chartDaily" height="200"></canvas>
     </div>
   </div>
-
-  <!-- Payment methods donut -->
   <div class="card">
     <div class="card-header">
       <span class="card-title">Payment Methods</span>
@@ -119,7 +114,6 @@ $c = $kpis['currency'] ?? 'S/';
       <?php endif; ?>
     </div>
   </div>
-
 </div>
 
 <!-- Transactions table -->
@@ -179,7 +173,7 @@ $c = $kpis['currency'] ?? 'S/';
               <?= clean($t['method_label']) ?>
             </span>
           </td>
-          <td style="font-size:0.95rem;font-weight:600;color:var(--text)">
+          <td style="font-size:0.95rem;font-weight:600">
             <?= $c ?> <?= number_format((float)$t['amount'], 2) ?>
           </td>
           <td style="font-size:0.82rem;color:var(--text-secondary);white-space:nowrap">
@@ -187,16 +181,21 @@ $c = $kpis['currency'] ?? 'S/';
           </td>
           <td><?= statusBadge($t['status'] ?? 'pending') ?></td>
           <td>
-            <div style="display:flex;justify-content:flex-end">
+            <div style="display:flex;justify-content:flex-end;gap:6px">
               <?php if($t['status'] === 'pending'): ?>
-              <form method="POST" action="<?= url('finance/update') ?>">
+              <form method="POST" action="<?= BASE_URL ?>/index.php?url=finance/update">
                 <?= csrfField() ?>
                 <input type="hidden" name="id" value="<?= (int)$t['id'] ?>">
                 <input type="hidden" name="status" value="paid">
-                <button type="submit" class="btn btn-primary" style="padding:4px 12px;font-size:0.78rem">Mark Paid</button>
+                <button type="submit" class="btn btn-primary" style="padding:5px 12px;font-size:0.78rem">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                  Mark Paid
+                </button>
               </form>
+              <?php elseif($t['status'] === 'paid'): ?>
+              <span class="badge badge-success">Paid</span>
               <?php else: ?>
-              <span style="font-size:0.75rem;color:var(--text-muted)">—</span>
+              <span class="badge badge-secondary"><?= ucfirst($t['status']) ?></span>
               <?php endif; ?>
             </div>
           </td>
@@ -217,9 +216,7 @@ $c = $kpis['currency'] ?? 'S/';
   <?php endif; ?>
 </div>
 
-<!-- ============================================================
-     REGISTER PAYMENT MODAL
-     ============================================================ -->
+<!-- REGISTER PAYMENT MODAL -->
 <div class="modal-backdrop" id="paymentModal">
   <div class="modal" style="max-width:520px">
     <div class="modal-header">
@@ -228,10 +225,9 @@ $c = $kpis['currency'] ?? 'S/';
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
     </div>
-    <form method="POST" action="<?= url('finance/store') ?>">
+    <form method="POST" action="<?= BASE_URL ?>/index.php?url=finance/store">
       <?= csrfField() ?>
       <div class="modal-body">
-
         <div class="form-group">
           <label class="form-label">Appointment <span style="color:var(--danger)">*</span></label>
           <?php if(count($pending) > 0): ?>
@@ -255,7 +251,6 @@ $c = $kpis['currency'] ?? 'S/';
           <?php endif; ?>
         </div>
 
-        <!-- Auto-filled appointment info -->
         <div id="apptInfo" style="display:none;margin-bottom:16px;padding:12px 14px;background:var(--primary-light);border-radius:8px;border:1px solid #b7ebd9">
           <div style="font-weight:600;color:var(--primary-dark);font-size:0.875rem" id="apptPatientName"></div>
           <div style="color:var(--text-secondary);margin-top:2px;font-size:0.8rem" id="apptProcName"></div>
@@ -268,8 +263,7 @@ $c = $kpis['currency'] ?? 'S/';
             <div style="position:relative">
               <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.85rem;pointer-events:none"><?= $c ?></span>
               <input type="number" name="amount" id="amountInput" class="form-input"
-                step="0.01" min="0.01" required placeholder="0.00"
-                style="padding-left:30px">
+                step="0.01" min="0.01" required placeholder="0.00" style="padding-left:30px">
             </div>
           </div>
           <div class="form-group" style="margin-bottom:0">
@@ -301,7 +295,6 @@ $c = $kpis['currency'] ?? 'S/';
   </div>
 </div>
 
-<!-- Chart data passed from controller -->
 <script>
 window.financeData = {
   dailyLabels:  <?= $chartData['dailyLabels'] ?>,

@@ -49,6 +49,7 @@ Router::get('/finance',           'FinanceController@index');
 Router::post('/finance/store',    'FinanceController@store');
 Router::post('/finance/update',   'FinanceController@update');
 
+
 // ---- Reports ----
 Router::get('/reports',           'ReportsController@index');
 Router::get('/reports/export',    'ReportsController@export');
