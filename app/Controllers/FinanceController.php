@@ -14,47 +14,55 @@ class FinanceController extends Controller {
         $status   = $this->sanitize($this->input('status', ''));
         $method   = $this->sanitize($this->input('method', ''));
 
+        // Data
         $kpis         = $this->model->getKpis();
         $daily        = $this->model->getDailyRevenue(14);
         $methodBreak  = $this->model->getPaymentMethodBreakdown();
         $transactions = $this->model->getAllTransactions($search, $status, $method);
         $pending      = $this->model->getPendingAppointments();
-        $evolution    = $this->model->getMonthlyEvolution(8);
-        $colors       = $this->model->getPaymentMethodColors();
+        $colors       = FinanceModel::methodColors();
 
-        // Prepare chart data
-        $dailyLabels = array_column($daily, 'label');
-        $dailyData   = array_column($daily, 'total');
-        $evoLabels   = array_column($evolution, 'label');
-        $evoData     = array_column($evolution, 'total');
-        $methodLabels= array_map(
-            fn($m) => $this->model->formatMethod($m['payment_method']),
-            $methodBreak
-        );
-        $methodData  = array_column($methodBreak, 'total');
-        $methodColors= array_map(
-            fn($m) => $colors[$m['payment_method']] ?? '#888',
-            $methodBreak
-        );
+        // Build method breakdown with labels and colors already resolved
+        // so the view never needs to call any model method
+        $methodBreakFormatted = array_map(function($m) use ($colors) {
+            return [
+                'method'  => $m['payment_method'],
+                'label'   => FinanceModel::methodLabel($m['payment_method']),
+                'total'   => (float)$m['total'],
+                'count'   => (int)$m['count'],
+                'color'   => $colors[$m['payment_method']] ?? '#888780',
+            ];
+        }, $methodBreak);
+
+        // Build transactions with labels and colors already resolved
+        $transactionsFormatted = array_map(function($t) use ($colors) {
+            return array_merge($t, [
+                'method_label' => FinanceModel::methodLabel($t['payment_method']),
+                'method_color' => $colors[$t['payment_method']] ?? '#888780',
+            ]);
+        }, $transactions);
+
+        // Chart data — prepared in controller, passed as JSON strings
+        $chartData = [
+            'dailyLabels'  => json_encode(array_column($daily, 'label')),
+            'dailyData'    => json_encode(array_map('floatval', array_column($daily, 'total'))),
+            'methodLabels' => json_encode(array_column($methodBreakFormatted, 'label')),
+            'methodData'   => json_encode(array_column($methodBreakFormatted, 'total')),
+            'methodColors' => json_encode(array_column($methodBreakFormatted, 'color')),
+        ];
 
         $this->view('finance/index', [
-            'title'        => 'Finance',
-            'kpis'         => $kpis,
-            'transactions' => $transactions,
-            'pending'      => $pending,
-            'methodBreak'  => $methodBreak,
-            'search'       => $search,
-            'statusFilter' => $status,
-            'methodFilter' => $method,
-            'dailyLabels'  => json_encode($dailyLabels),
-            'dailyData'    => json_encode(array_map('floatval', $dailyData)),
-            'evoLabels'    => json_encode($evoLabels),
-            'evoData'      => json_encode(array_map('floatval', $evoData)),
-            'methodLabels' => json_encode($methodLabels),
-            'methodData'   => json_encode(array_map('floatval', $methodData)),
-            'methodColors' => json_encode($methodColors),
-            'extraJs'      => ['finance.js'],
-            'extraCss'     => ['finance.css'],
+            'title'                => 'Finance',
+            'kpis'                 => $kpis,
+            'methodBreakFormatted' => $methodBreakFormatted,
+            'transactions'         => $transactionsFormatted,
+            'pending'              => $pending,
+            'search'               => $search,
+            'statusFilter'         => $status,
+            'methodFilter'         => $method,
+            'chartData'            => $chartData,
+            'extraJs'              => ['finance.js'],
+            'extraCss'             => ['finance.css'],
         ]);
     }
 
@@ -64,7 +72,7 @@ class FinanceController extends Controller {
 
         $appointmentId = (int)$this->input('appointment_id');
         $patientId     = (int)$this->input('patient_id');
-        $amount        = (float)$this->input('amount');
+        $amount        = (float)str_replace(',', '.', $this->input('amount', '0'));
         $method        = $this->sanitize($this->input('payment_method', 'cash'));
         $notes         = $this->sanitize($this->input('notes', ''));
 

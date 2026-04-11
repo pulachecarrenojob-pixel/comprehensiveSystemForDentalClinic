@@ -10,22 +10,16 @@
   border-radius: 99px;
   font-size: 0.75rem;
   font-weight: 500;
-  border: 1px solid;
 }
 
-/* KPI card left layout (reuse from app.css if missing) */
+/* KPI left layout */
 .kpi-left {
   display: flex;
   align-items: center;
   gap: 14px;
   flex: 1;
+  min-width: 0;
 }
-
-/* KPI icon colors */
-.kpi-icon.green  { background: var(--primary-light); color: var(--primary); }
-.kpi-icon.blue   { background: var(--accent-light);  color: var(--accent); }
-.kpi-icon.orange { background: #fff8ee; color: var(--warning); }
-.kpi-icon.red    { background: var(--danger-light); color: var(--danger); }
 
 /* Patient avatar */
 .patient-avatar {
@@ -36,11 +30,17 @@
   flex-shrink: 0;
 }
 
+/* Force SVG size in KPI icons */
+.kpi-icon { flex-shrink: 0; }
+.kpi-icon svg { width: 20px !important; height: 20px !important; display: block; }
+
 /* Responsive */
-@media (max-width: 768px) {
-  .kpi-grid { grid-template-columns: 1fr 1fr; }
+@media (max-width: 1024px) {
   .charts-row { grid-template-columns: 1fr; }
 }
+@media (max-width: 768px) {
+  .kpi-grid { grid-template-columns: 1fr 1fr !important; }
+}
 @media (max-width: 480px) {
-  .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .kpi-grid { grid-template-columns: 1fr 1fr !important; }
 }

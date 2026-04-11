@@ -1,15 +1,14 @@
 /* ============================================================
    DentalCare — finance.js
-   Charts, search, payment modal autofill
    ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
   const d = window.financeData;
   if (!d) return;
 
-  const gridColor  = 'rgba(0,0,0,0.05)';
-  const textColor  = '#6b7280';
-  const baseFont   = { family: "'DM Sans', system-ui, sans-serif", size: 12 };
-  const tipStyle   = {
+  const gridColor = 'rgba(0,0,0,0.05)';
+  const textColor = '#6b7280';
+  const baseFont  = { family: "'DM Sans', system-ui, sans-serif", size: 12 };
+  const tipStyle  = {
     backgroundColor: '#111827',
     titleColor: '#fff',
     bodyColor: '#9ca3af',
@@ -28,8 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
         datasets: [{
           label: 'Revenue',
           data: d.dailyData.length ? d.dailyData : [0],
-          backgroundColor: d.dailyData.map((v, i) =>
-            v === Math.max(...d.dailyData) ? '#1D9E75' : 'rgba(29,158,117,0.2)'
+          backgroundColor: d.dailyData.map(v =>
+            v === Math.max(...d.dailyData) && v > 0 ? '#1D9E75' : 'rgba(29,158,117,0.2)'
           ),
           borderRadius: 6,
           borderSkipped: false,
@@ -41,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
         plugins: {
           legend: { display: false },
           tooltip: { ...tipStyle, callbacks: {
-            label: (item) => ' S/ ' + Number(item.raw).toLocaleString('es-PE', {minimumFractionDigits:2}),
+            label: (item) => ' S/ ' + Number(item.raw).toLocaleString('es-PE', { minimumFractionDigits: 2 }),
           }}
         },
         scales: {
@@ -49,8 +48,12 @@ document.addEventListener('DOMContentLoaded', () => {
           y: {
             beginAtZero: true,
             grid: { color: gridColor },
-            ticks: { color: textColor, font: baseFont, callback: v => 'S/ ' + v.toLocaleString() },
-            border: { display: false }
+            border: { display: false },
+            ticks: {
+              color: textColor,
+              font: baseFont,
+              callback: v => 'S/ ' + Number(v).toLocaleString(),
+            }
           }
         }
       }
@@ -78,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
         plugins: {
           legend: { display: false },
           tooltip: { ...tipStyle, callbacks: {
-            label: (item) => ' S/ ' + Number(item.raw).toLocaleString('es-PE', {minimumFractionDigits:2}),
+            label: (item) => ' S/ ' + Number(item.raw).toLocaleString('es-PE', { minimumFractionDigits: 2 }),
           }}
         }
       }
@@ -108,26 +111,25 @@ function fillPaymentForm(select) {
   const patient = document.getElementById('patientIdHidden');
 
   if (!opt.value) {
-    info.style.display = 'none';
+    if (info) info.style.display = 'none';
     return;
   }
 
-  info.style.display  = 'block';
-  nameEl.textContent  = opt.dataset.name  || '';
-  procEl.textContent  = opt.dataset.proc  || '';
-  amount.value        = opt.dataset.price ? parseFloat(opt.dataset.price).toFixed(2) : '';
-  patient.value       = opt.dataset.patient || '0';
+  if (info)    info.style.display    = 'block';
+  if (nameEl)  nameEl.textContent    = opt.dataset.name  || '';
+  if (procEl)  procEl.textContent    = opt.dataset.proc  || '';
+  if (amount)  amount.value          = opt.dataset.price || '';
+  if (patient) patient.value         = opt.dataset.patient || '0';
 }
 
 // ---- Server-side filters ----
 function applyFilters() {
-  const status = document.getElementById('statusFilter').value;
-  const method = document.getElementById('methodFilter').value;
-  const search = document.getElementById('txSearch')?.value || '';
-  const base   = window.location.pathname;
+  const status = document.getElementById('statusFilter')?.value || '';
+  const method = document.getElementById('methodFilter')?.value || '';
+  const search = document.getElementById('txSearch')?.value    || '';
   const params = new URLSearchParams({ url: 'finance' });
   if (status) params.set('status', status);
   if (method) params.set('method', method);
   if (search) params.set('search', search);
-  window.location.href = base + '?' + params.toString();
+  window.location.href = window.location.pathname + '?' + params.toString();
 }

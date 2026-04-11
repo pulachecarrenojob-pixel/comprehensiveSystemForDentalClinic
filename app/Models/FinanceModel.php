@@ -2,6 +2,30 @@
 class FinanceModel extends Model {
     protected string $table = 'transactions';
 
+    // ---- Helpers estáticos reutilizables ----
+    public static function methodColors(): array {
+        return [
+            'cash'        => '#1D9E75',
+            'credit_card' => '#378ADD',
+            'debit_card'  => '#7F77DD',
+            'transfer'    => '#EF9F27',
+            'insurance'   => '#D85A30',
+            'other'       => '#888780',
+        ];
+    }
+
+    public static function methodLabel(string $method): string {
+        return match($method) {
+            'cash'        => 'Cash',
+            'credit_card' => 'Credit Card',
+            'debit_card'  => 'Debit Card',
+            'transfer'    => 'Transfer',
+            'insurance'   => 'Insurance',
+            default       => 'Other',
+        };
+    }
+
+    // ---- KPIs ----
     public function getKpis(): array {
         $currency = getSettingValue('currency', 'S/');
 
@@ -37,21 +61,22 @@ class FinanceModel extends Model {
                AND YEAR(created_at)=YEAR(NOW())"
         );
 
-        $curr = (float)($monthRevenue['total'] ?? 0);
-        $prev = (float)($prevRevenue['total'] ?? 0);
+        $curr  = (float)($monthRevenue['total'] ?? 0);
+        $prev  = (float)($prevRevenue['total']  ?? 0);
         $delta = $prev > 0 ? round((($curr - $prev) / $prev) * 100, 1) : 0;
 
         return [
-            'month_revenue'   => $curr,
-            'revenue_delta'   => $delta,
-            'pending_amount'  => (float)($pending['total']  ?? 0),
-            'pending_count'   => (int)($pending['count']    ?? 0),
-            'avg_ticket'      => (float)($avgTicket['total'] ?? 0),
-            'total_tx'        => (int)($totalTx['total']    ?? 0),
-            'currency'        => $currency,
+            'month_revenue'  => $curr,
+            'revenue_delta'  => $delta,
+            'pending_amount' => (float)($pending['total']   ?? 0),
+            'pending_count'  => (int)($pending['count']     ?? 0),
+            'avg_ticket'     => (float)($avgTicket['total'] ?? 0),
+            'total_tx'       => (int)($totalTx['total']     ?? 0),
+            'currency'       => $currency,
         ];
     }
 
+    // ---- Charts ----
     public function getDailyRevenue(int $days = 14): array {
         return $this->query(
             "SELECT DATE(paid_at) as day,
@@ -80,6 +105,22 @@ class FinanceModel extends Model {
         );
     }
 
+    public function getMonthlyEvolution(int $months = 8): array {
+        return $this->query(
+            "SELECT DATE_FORMAT(paid_at,'%b') as label,
+                    MONTH(paid_at) as month_num,
+                    YEAR(paid_at)  as year_num,
+                    COALESCE(SUM(amount),0) as total
+             FROM transactions
+             WHERE status='paid'
+               AND paid_at >= DATE_SUB(NOW(), INTERVAL ? MONTH)
+             GROUP BY YEAR(paid_at), MONTH(paid_at)
+             ORDER BY YEAR(paid_at), MONTH(paid_at)",
+            [$months]
+        );
+    }
+
+    // ---- Transactions list ----
     public function getAllTransactions(string $search = '', string $status = '', string $method = ''): array {
         $sql = "SELECT t.*,
                     CONCAT(p.first_name,' ',p.last_name) as patient_name,
@@ -97,28 +138,22 @@ class FinanceModel extends Model {
             $like = "%{$search}%";
             $params = array_merge($params, [$like, $like]);
         }
-        if ($status) {
-            $sql .= " AND t.status = ?";
-            $params[] = $status;
-        }
-        if ($method) {
-            $sql .= " AND t.payment_method = ?";
-            $params[] = $method;
-        }
+        if ($status) { $sql .= " AND t.status=?";           $params[] = $status; }
+        if ($method) { $sql .= " AND t.payment_method=?";   $params[] = $method; }
 
         $sql .= " ORDER BY t.created_at DESC LIMIT 100";
         return $this->query($sql, $params);
     }
 
+    // ---- Pending appointments (no payment yet) ----
     public function getPendingAppointments(): array {
         return $this->query(
             "SELECT a.id as appointment_id,
+                    p.id as patient_id,
                     CONCAT(p.first_name,' ',p.last_name) as patient_name,
                     pr.name as procedure_name,
                     pr.price,
                     a.date,
-                    a.start_time,
-                    d.id as dentist_id,
                     u.name as dentist_name
              FROM appointments a
              JOIN patients p    ON a.patient_id   = p.id
@@ -134,6 +169,7 @@ class FinanceModel extends Model {
         );
     }
 
+    // ---- Write operations ----
     public function registerPayment(array $data): int {
         return $this->insert($data);
     }
@@ -144,42 +180,5 @@ class FinanceModel extends Model {
             $data['paid_at'] = date('Y-m-d H:i:s');
         }
         return $this->update($id, $data);
-    }
-
-    public function getMonthlyEvolution(int $months = 8): array {
-        return $this->query(
-            "SELECT DATE_FORMAT(paid_at,'%b %Y') as label,
-                    MONTH(paid_at) as month_num,
-                    YEAR(paid_at)  as year_num,
-                    COALESCE(SUM(amount),0) as total
-             FROM transactions
-             WHERE status='paid'
-               AND paid_at >= DATE_SUB(NOW(), INTERVAL ? MONTH)
-             GROUP BY YEAR(paid_at), MONTH(paid_at)
-             ORDER BY YEAR(paid_at), MONTH(paid_at)",
-            [$months]
-        );
-    }
-
-    public function getPaymentMethodColors(): array {
-        return [
-            'cash'        => '#1D9E75',
-            'credit_card' => '#378ADD',
-            'debit_card'  => '#7F77DD',
-            'transfer'    => '#EF9F27',
-            'insurance'   => '#D85A30',
-            'other'       => '#888780',
-        ];
-    }
-
-    public function formatMethod(string $method): string {
-        return match($method) {
-            'cash'        => 'Cash',
-            'credit_card' => 'Credit Card',
-            'debit_card'  => 'Debit Card',
-            'transfer'    => 'Transfer',
-            'insurance'   => 'Insurance',
-            default       => 'Other',
-        };
     }
 }
