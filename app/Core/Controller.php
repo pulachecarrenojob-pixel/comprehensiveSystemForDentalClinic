@@ -4,16 +4,13 @@ class Controller {
         extract($data);
         $viewFile = BASE_PATH . '/views/' . $viewPath . '.php';
         if (!file_exists($viewFile)) {
-            die("View not found: {$viewPath}");
+            die('View not found: ' . $viewPath);
         }
-
-        // Capture view content
         ob_start();
         require $viewFile;
         $content = ob_get_clean();
 
-        // Use layout
-        $layout = $data['layout'] ?? 'layouts/main';
+        $layout     = $data['layout'] ?? 'layouts/main';
         $layoutFile = BASE_PATH . '/views/' . $layout . '.php';
         if (file_exists($layoutFile)) {
             require $layoutFile;
@@ -30,12 +27,13 @@ class Controller {
     }
 
     protected function redirect(string $path): void {
-        header('Location: ' . BASE_URL . $path);
+        $path = ltrim($path, '/');
+        header('Location: ' . BASE_URL . '/index.php?url=' . $path);
         exit;
     }
 
     protected function back(): void {
-        $ref = $_SERVER['HTTP_REFERER'] ?? BASE_URL . '/';
+        $ref = $_SERVER['HTTP_REFERER'] ?? (BASE_URL . '/index.php?url=dashboard');
         header('Location: ' . $ref);
         exit;
     }

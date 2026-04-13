@@ -2,14 +2,14 @@
 class Auth {
     public static function check(): void {
         if (!isset($_SESSION['user'])) {
-            header('Location: ' . BASE_URL . '/login');
+            header('Location: ' . BASE_URL . '/index.php?url=login');
             exit;
         }
     }
 
     public static function guest(): void {
         if (isset($_SESSION['user'])) {
-            header('Location: ' . BASE_URL . '/dashboard');
+            header('Location: ' . BASE_URL . '/index.php?url=dashboard');
             exit;
         }
     }
@@ -47,7 +47,7 @@ class Auth {
     public static function logout(): void {
         $_SESSION = [];
         session_destroy();
-        header('Location: ' . BASE_URL . '/login');
+        header('Location: ' . BASE_URL . '/index.php?url=login');
         exit;
     }
 
