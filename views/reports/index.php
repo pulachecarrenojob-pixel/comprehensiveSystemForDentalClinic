@@ -15,7 +15,7 @@ $ranges = [
     <h2>Reports</h2>
     <p>Analytics for <?= formatDate($from) ?> — <?= formatDate($to) ?></p>
   </div>
-  <a href="<?= $baseUrl ?>?url=reports/export&from=<?= urlencode($from) ?>&to=<?= urlencode($to) ?>"
+  <a href="<?= $baseUrl ?>?url=reports%2Fexport&from=<?= urlencode($from) ?>&to=<?= urlencode($to) ?>"
      class="btn btn-outline" target="_blank">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
     Export CSV
@@ -36,16 +36,17 @@ $ranges = [
         <input type="date" name="to" value="<?= htmlspecialchars($to) ?>" class="form-input" style="width:155px">
       </div>
       <button type="submit" class="btn btn-primary" style="padding:8px 20px">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;flex-shrink:0"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         Apply
       </button>
+      <!-- Quick range links -->
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-left:auto">
         <?php foreach($ranges as $label => [$rf, $rt]):
           $active = ($from === $rf && $to === $rt);
         ?>
         <a href="<?= $baseUrl ?>?url=reports&from=<?= urlencode($rf) ?>&to=<?= urlencode($rt) ?>"
            class="btn <?= $active ? 'btn-primary' : 'btn-outline' ?>"
-           style="padding:5px 12px;font-size:0.75rem">
+           style="padding:5px 12px;font-size:0.75px;font-size:0.75rem">
           <?= $label ?>
         </a>
         <?php endforeach; ?>
@@ -106,7 +107,7 @@ $ranges = [
   </div>
 </div>
 
-<!-- Charts row -->
+<!-- Charts by dentist -->
 <div class="charts-row" style="margin-bottom:20px">
   <div class="card">
     <div class="card-header"><span class="card-title">Appointments by Dentist</span></div>
@@ -124,23 +125,19 @@ $ranges = [
       <?php if(count($revByDentist) > 0): ?>
       <canvas id="chartDentistRev" height="220"></canvas>
       <?php else: ?>
-      <div class="empty-state" style="padding:28px"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><h3>No data</h3><p>No revenue in this period</p></div>
+      <div class="empty-state" style="padding:28px"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/></svg><h3>No data</h3><p>No revenue in this period</p></div>
       <?php endif; ?>
     </div>
   </div>
 </div>
 
-<!-- Evolution line chart -->
+<!-- Monthly evolution -->
 <div class="card" style="margin-bottom:20px">
   <div class="card-header">
     <span class="card-title">Monthly Evolution</span>
     <div style="display:flex;gap:14px">
-      <span style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:var(--text-muted)">
-        <span style="width:14px;height:3px;background:#1D9E75;border-radius:2px;display:inline-block"></span>Appointments
-      </span>
-      <span style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:var(--text-muted)">
-        <span style="width:14px;height:3px;background:#378ADD;border-radius:2px;display:inline-block"></span>Revenue
-      </span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:var(--text-muted)"><span style="width:14px;height:3px;background:#1D9E75;border-radius:2px;display:inline-block"></span>Appointments</span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:0.75rem;color:var(--text-muted)"><span style="width:14px;height:3px;background:#378ADD;border-radius:2px;display:inline-block"></span>Revenue</span>
     </div>
   </div>
   <div class="card-body" style="padding:16px 20px">
@@ -169,9 +166,7 @@ $ranges = [
           <span style="width:22px;height:22px;border-radius:6px;background:<?= clean($p['color']) ?>20;color:<?= clean($p['color']) ?>;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0"><?= $i+1 ?></span>
           <div style="flex:1;min-width:0">
             <div style="font-size:0.85rem;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><?= clean($p['name']) ?></div>
-            <div class="proc-bar-wrap">
-              <div class="proc-bar" style="width:<?= round(($p['total']/$maxTotal)*100) ?>%;background:<?= clean($p['color']) ?>"></div>
-            </div>
+            <div class="proc-bar-wrap"><div class="proc-bar" style="width:<?= round(($p['total']/$maxTotal)*100) ?>%;background:<?= clean($p['color']) ?>"></div></div>
           </div>
         </div>
         <div style="text-align:right;flex-shrink:0;margin-left:12px">
@@ -182,7 +177,7 @@ $ranges = [
       <?php endforeach; ?>
     </div>
     <?php else: ?>
-    <div class="card-body"><div class="empty-state" style="padding:28px"><h3>No procedures</h3><p>No data in this period</p></div></div>
+    <div class="card-body"><div class="empty-state" style="padding:28px"><h3>No procedures</h3></div></div>
     <?php endif; ?>
   </div>
 

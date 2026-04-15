@@ -8,28 +8,16 @@ function clean(string $value): string {
 }
 
 /**
- * Generates a URL compatible with the router.
- * The router reads $_GET['url'], so all links must use ?url=path.
- * Example: url('patients') => http://localhost/dentalcare/public/index.php?url=patients
+ * Generates correct URL for the router (?url= format)
+ * url('patients')      => BASE_URL/index.php?url=patients
+ * url('patients/show') => BASE_URL/index.php?url=patients/show
  */
 function url(string $path = ''): string {
     $path = ltrim($path, '/');
     if ($path === '' || $path === 'dashboard') {
         return BASE_URL . '/index.php?url=dashboard';
     }
-    return BASE_URL . '/index.php?url=' . $path;
-}
-
-/**
- * url() with extra GET params
- * Example: urlQ('reports', ['from'=>'2026-01-01'])
- */
-function urlQ(string $path, array $params = []): string {
-    $base = url($path);
-    if (!empty($params)) {
-        $base .= '&' . http_build_query($params);
-    }
-    return $base;
+    return BASE_URL . '/index.php?url=' . rawurlencode($path);
 }
 
 function asset(string $path): string {

@@ -13,32 +13,26 @@ class Router {
     public static function dispatch(): void {
         $method = $_SERVER['REQUEST_METHOD'];
 
-        // Always read from ?url= parameter
-        $uri = '/' . trim($_GET['url'] ?? '', '/');
+        // Read from ?url= parameter — always
+        $uri = trim($_GET['url'] ?? '', '/');
 
-        // Normalize: remove trailing slash unless root
-        if ($uri !== '/') {
-            $uri = rtrim($uri, '/');
+        // Default to dashboard
+        if ($uri === '') {
+            $uri = 'dashboard';
         }
 
-        // Default route
-        if ($uri === '/' || $uri === '') {
-            $uri = '/dashboard';
-        }
+        // Normalize: add leading slash to match routes
+        $uri = '/' . $uri;
 
         $handler = self::$routes[$method][$uri] ?? null;
-
-        if (!$handler) {
-            // Try without leading slash as fallback
-            $handler = self::$routes[$method][ltrim($uri, '/')] ?? null;
-        }
 
         if (!$handler) {
             http_response_code(404);
             if (file_exists(BASE_PATH . '/views/errors/404.php')) {
                 require BASE_PATH . '/views/errors/404.php';
             } else {
-                echo '<h1>404 — Page not found</h1><p>Route not found: ' . htmlspecialchars($uri) . '</p>';
+                echo '<h1>404 — Page not found</h1>';
+                echo '<p>Route not found: <code>' . htmlspecialchars($uri) . '</code></p>';
             }
             return;
         }
@@ -47,14 +41,14 @@ class Router {
         $controllerFile = BASE_PATH . '/app/Controllers/' . $controllerName . '.php';
 
         if (!file_exists($controllerFile)) {
-            die('Controller not found: ' . $controllerName);
+            die('Controller not found: ' . htmlspecialchars($controllerName));
         }
 
         require_once $controllerFile;
         $controller = new $controllerName();
 
         if (!method_exists($controller, $methodName)) {
-            die('Method not found: ' . $controllerName . '@' . $methodName);
+            die('Method not found: ' . htmlspecialchars($controllerName . '@' . $methodName));
         }
 
         $controller->$methodName();
